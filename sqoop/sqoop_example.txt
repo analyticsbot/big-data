@@ -1,0 +1,248 @@
+## list out the folders on HDFS root directory
+hadoop fs -ls /
+
+# output
+Found 3 items
+drwxrwxrwt   - hdfs supergroup          0 2013-09-10 10:35 /tmp
+drwxrwxrwx   - hue  supergroup          0 2013-09-10 10:37 /user
+drwxr-xr-x   - hdfs supergroup          0 2013-09-05 20:08 /var
+
+## command
+sqoop version
+
+# output
+Sqoop 1.4.2-cdh4.2.1
+git commit id a0862dc56393e3096c65d6ca26766c67f5ab5309
+Compiled by jenkins on Mon Apr 22 11:36:27 PDT 2013
+
+## command
+sqoop help
+
+# output
+usage: sqoop COMMAND [ARGS]
+
+Available commands:
+  codegen            Generate code to interact with database records
+  create-hive-table  Import a table definition into Hive
+  eval               Evaluate a SQL statement and display the results
+  export             Export an HDFS directory to a database table
+  help               List available commands
+  import             Import a table from a database to HDFS
+  import-all-tables  Import tables from a database to HDFS
+  job                Work with saved jobs
+  list-databases     List available databases on a server
+  list-tables        List available tables in a database
+  merge              Merge results of incremental imports
+  metastore          Run a standalone Sqoop metastore
+  version            Display version information
+
+## sqoop list-databases to list out all the databases in mysql
+[training@localhost ~]$ sqoop list-databases \
+> --connect "jdbc:mysql://localhost.localdomain:3306" \
+> --username training \
+> --password training
+
+# output
+17/01/30 21:54:39 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+17/01/30 21:54:39 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+information_schema
+hue
+metastore
+mysql
+test
+training
+
+## list all tables in a database on mysql
+[training@localhost ~]$ sqoop list-tables --connect "jdbc:mysql://localhost.localdomain:3306/training"
+ --username training --password training
+
+# output
+17/01/30 21:55:46 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+17/01/30 21:55:46 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+Movies
+bible_freq
+cityByCountry
+countries
+shake_freq
+
+## evaluate a sql query using sqoop eval
+[training@localhost ~]$ sqoop eval --connect "jdbc:mysql://localhost.localdomain:3306/training" 
+--username training --password training --query "select * from countries limit 10;"
+
+# output
+17/01/31 01:33:43 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. 
+Consider using -P instead.
+17/01/31 01:33:43 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+-------------------------------------------
+| id          | name                 | code | 
+-------------------------------------------
+| 1           | AFGHANISTAN          | AF | 
+| 2           | ALBANIA              | AL | 
+| 3           | ALGERIA              | DZ | 
+| 4           | AMERICAN SAMOA       | AS | 
+| 5           | ANDORRA              | AD | 
+| 6           | ANGOLA               | AO | 
+| 7           | ANGUILLA             | AI | 
+| 8           | ANTARCTICA           | AQ | 
+| 9           | ANTIGUA AND BARBUDA  | AG | 
+| 10          | ARGENTINA            | AR | 
+-------------------------------------------
+
+## import all tables in a database on mysql
+[training@localhost ~]$ sqoop import-all-tables --connect \ 
+"jdbc:mysql://localhost.localdomain:3306/training" --username training 
+--password training --target-dir /user/training/sqoop_import --num-mappers 6
+
+## import a table in a database on mysql
+[training@localhost ~]$ sqoop import --connect "jdbc:mysql://localhost.localdomain:3306/training"
+ --username training --password training --table shake_freq 
+--target-dir /user/training/sqoop_shake_freq_import --num-mappers 6
+
+#output
+17/01/30 21:28:26 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+17/01/30 21:28:26 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+17/01/30 21:28:26 INFO tool.CodeGenTool: Beginning code generation
+17/01/30 21:28:27 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `shake_freq` AS t LIMIT 1
+17/01/30 21:28:27 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `shake_freq` AS t LIMIT 1
+17/01/30 21:28:27 INFO orm.CompilationManager: HADOOP_HOME is /usr/lib/hadoop
+Note: /tmp/sqoop-training/compile/bcbf38024ca522d9874110e2b55cdd49/shake_freq.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+17/01/30 21:28:37 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-training/compile/bcbf38024ca522d9874110e2b55cdd49/shake_freq.jar
+17/01/30 21:28:37 WARN manager.MySQLManager: It looks like you are importing from mysql.
+17/01/30 21:28:37 WARN manager.MySQLManager: This transfer can be faster! Use the --direct
+17/01/30 21:28:37 WARN manager.MySQLManager: option to exercise a MySQL-specific fast path.
+17/01/30 21:28:37 INFO manager.MySQLManager: Setting zero DATETIME behavior to convertToNull (mysql)
+17/01/30 21:28:37 INFO mapreduce.ImportJobBase: Beginning import of shake_freq
+17/01/30 21:28:41 WARN mapred.JobClient: Use GenericOptionsParser for parsing the arguments. Applications should implement Tool for the same.
+17/01/30 21:28:44 INFO db.DataDrivenDBInputFormat: BoundingValsQuery: SELECT MIN(`word`), MAX(`word`) FROM `shake_freq`
+17/01/30 21:28:44 WARN db.TextSplitter: Generating splits for a textual index column.
+17/01/30 21:28:44 WARN db.TextSplitter: If your database sorts in a case-insensitive order, this may result in a partial import or duplicate records.
+17/01/30 21:28:44 WARN db.TextSplitter: You are strongly encouraged to choose an integral split column.
+17/01/30 21:28:45 INFO mapred.JobClient: Running job: job_201701302054_0001
+17/01/30 21:28:46 INFO mapred.JobClient:  map 0% reduce 0%
+17/01/30 21:29:15 INFO mapred.JobClient:  map 12% reduce 0%
+17/01/30 21:29:16 INFO mapred.JobClient:  map 25% reduce 0%
+17/01/30 21:29:31 INFO mapred.JobClient:  map 50% reduce 0%
+17/01/30 21:29:46 INFO mapred.JobClient:  map 62% reduce 0%
+17/01/30 21:29:47 INFO mapred.JobClient:  map 75% reduce 0%
+17/01/30 21:30:06 INFO mapred.JobClient:  map 87% reduce 0%
+17/01/30 21:30:08 INFO mapred.JobClient:  map 100% reduce 0%
+17/01/30 21:30:15 INFO mapred.JobClient: Job complete: job_201701302054_0001
+17/01/30 21:30:15 INFO mapred.JobClient: Counters: 23
+17/01/30 21:30:15 INFO mapred.JobClient:   File System Counters
+17/01/30 21:30:15 INFO mapred.JobClient:     FILE: Number of bytes read=0
+17/01/30 21:30:15 INFO mapred.JobClient:     FILE: Number of bytes written=1593792
+17/01/30 21:30:15 INFO mapred.JobClient:     FILE: Number of read operations=0
+17/01/30 21:30:15 INFO mapred.JobClient:     FILE: Number of large read operations=0
+17/01/30 21:30:15 INFO mapred.JobClient:     FILE: Number of write operations=0
+17/01/30 21:30:15 INFO mapred.JobClient:     HDFS: Number of bytes read=1075
+17/01/30 21:30:15 INFO mapred.JobClient:     HDFS: Number of bytes written=324840
+17/01/30 21:30:15 INFO mapred.JobClient:     HDFS: Number of read operations=8
+17/01/30 21:30:15 INFO mapred.JobClient:     HDFS: Number of large read operations=0
+17/01/30 21:30:15 INFO mapred.JobClient:     HDFS: Number of write operations=8
+17/01/30 21:30:15 INFO mapred.JobClient:   Job Counters 
+17/01/30 21:30:15 INFO mapred.JobClient:     Launched map tasks=8
+17/01/30 21:30:15 INFO mapred.JobClient:     Total time spent by all maps in occupied slots (ms)=152210
+17/01/30 21:30:15 INFO mapred.JobClient:     Total time spent by all reduces in occupied slots (ms)=0
+17/01/30 21:30:15 INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0
+17/01/30 21:30:15 INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0
+17/01/30 21:30:15 INFO mapred.JobClient:   Map-Reduce Framework
+17/01/30 21:30:15 INFO mapred.JobClient:     Map input records=31809
+17/01/30 21:30:15 INFO mapred.JobClient:     Map output records=31809
+17/01/30 21:30:15 INFO mapred.JobClient:     Input split bytes=1075
+17/01/30 21:30:15 INFO mapred.JobClient:     Spilled Records=0
+17/01/30 21:30:15 INFO mapred.JobClient:     CPU time spent (ms)=17950
+17/01/30 21:30:15 INFO mapred.JobClient:     Physical memory (bytes) snapshot=396861440
+17/01/30 21:30:15 INFO mapred.JobClient:     Virtual memory (bytes) snapshot=3104276480
+17/01/30 21:30:15 INFO mapred.JobClient:     Total committed heap usage (bytes)=130023424
+17/01/30 21:30:15 INFO mapreduce.ImportJobBase: Transferred 0 bytes in 97.074 seconds (0 bytes/sec)
+17/01/30 21:30:15 INFO mapreduce.ImportJobBase: Retrieved 31809 records.
+
+## import table as text file
+[training@localhost ~]$ sqoop import \
+> --connect "jdbc:mysql://localhost.localdomain:3306/training" \
+> --username training \
+> --password training \
+> --table Movies \
+> --as-textfile \
+> --target-dir /user/training/sqoop_file_import
+
+## import table as sequence file
+[training@localhost ~]$ sqoop import --connect "jdbc:mysql://localhost.localdomain:3306/training" 
+--username training --password training --table Movies --as-sequencefile 
+--target-dir /user/training/sqoop_seqfile_import
+
+## import table as avrodata file
+[training@localhost ~]$ sqoop import --connect "jdbc:mysql://localhost.localdomain:3306/training" 
+--username training --password training --table Movies --as-avrodatafile 
+--target-dir /user/training/sqoop_avrofile_import
+
+## import table using where clause
+[training@localhost ~]$ sqoop import --connect "jdbc:mysql://localhost.localdomain:3306/training" 
+--username training --password training --where "name like '%A%'" -table countries -m 6 
+--target-dir /user/training/sqoop_countries
+
+# output
+17/01/31 13:35:35 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+17/01/31 13:35:36 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+17/01/31 13:35:36 INFO tool.CodeGenTool: Beginning code generation
+17/01/31 13:35:37 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `countries` AS t LIMIT 1
+17/01/31 13:35:37 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `countries` AS t LIMIT 1
+17/01/31 13:35:37 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/lib/hadoop-0.20-mapreduce
+17/01/31 13:35:37 INFO orm.CompilationManager: Found hadoop core jar at: /usr/lib/hadoop-0.20-mapreduce/hadoop-core.jar
+Note: /tmp/sqoop-training/compile/f7fb45e4e1b334b9296486aca1a1522c/countries.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+17/01/31 13:35:52 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-training/compile/f7fb45e4e1b334b9296486aca1a1522c/countries.jar
+17/01/31 13:35:52 WARN manager.MySQLManager: It looks like you are importing from mysql.
+17/01/31 13:35:52 WARN manager.MySQLManager: This transfer can be faster! Use the --direct
+17/01/31 13:35:52 WARN manager.MySQLManager: option to exercise a MySQL-specific fast path.
+17/01/31 13:35:52 INFO manager.MySQLManager: Setting zero DATETIME behavior to convertToNull (mysql)
+17/01/31 13:35:52 INFO mapreduce.ImportJobBase: Beginning import of countries
+17/01/31 13:36:01 WARN mapred.JobClient: Use GenericOptionsParser for parsing the arguments. Applications should implement Tool for the same.
+17/01/31 13:36:06 INFO db.DataDrivenDBInputFormat: BoundingValsQuery: SELECT MIN(`id`), MAX(`id`) FROM `countries` WHERE ( name like '%A%' )
+17/01/31 13:36:07 INFO mapred.JobClient: Running job: job_201701311056_0004
+17/01/31 13:36:08 INFO mapred.JobClient:  map 0% reduce 0%
+17/01/31 13:37:20 INFO mapred.JobClient:  map 16% reduce 0%
+17/01/31 13:37:29 INFO mapred.JobClient:  map 33% reduce 0%
+17/01/31 13:38:23 INFO mapred.JobClient:  map 50% reduce 0%
+17/01/31 13:38:24 INFO mapred.JobClient:  map 66% reduce 0%
+17/01/31 13:39:17 INFO mapred.JobClient:  map 83% reduce 0%
+17/01/31 13:39:18 INFO mapred.JobClient:  map 100% reduce 0%
+17/01/31 13:39:39 INFO mapred.JobClient: Job complete: job_201701311056_0004
+17/01/31 13:39:40 INFO mapred.JobClient: Counters: 23
+17/01/31 13:39:40 INFO mapred.JobClient:   File System Counters
+17/01/31 13:39:40 INFO mapred.JobClient:     FILE: Number of bytes read=0
+17/01/31 13:39:40 INFO mapred.JobClient:     FILE: Number of bytes written=1261446
+17/01/31 13:39:40 INFO mapred.JobClient:     FILE: Number of read operations=0
+17/01/31 13:39:40 INFO mapred.JobClient:     FILE: Number of large read operations=0
+17/01/31 13:39:40 INFO mapred.JobClient:     FILE: Number of write operations=0
+17/01/31 13:39:40 INFO mapred.JobClient:     HDFS: Number of bytes read=608
+17/01/31 13:39:40 INFO mapred.JobClient:     HDFS: Number of bytes written=4028
+17/01/31 13:39:40 INFO mapred.JobClient:     HDFS: Number of read operations=6
+17/01/31 13:39:40 INFO mapred.JobClient:     HDFS: Number of large read operations=0
+17/01/31 13:39:40 INFO mapred.JobClient:     HDFS: Number of write operations=6
+17/01/31 13:39:40 INFO mapred.JobClient:   Job Counters 
+17/01/31 13:39:40 INFO mapred.JobClient:     Launched map tasks=6
+17/01/31 13:39:40 INFO mapred.JobClient:     Total time spent by all maps in occupied slots (ms)=374206
+17/01/31 13:39:40 INFO mapred.JobClient:     Total time spent by all reduces in occupied slots (ms)=0
+17/01/31 13:39:40 INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0
+17/01/31 13:39:40 INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0
+17/01/31 13:39:40 INFO mapred.JobClient:   Map-Reduce Framework
+17/01/31 13:39:40 INFO mapred.JobClient:     Map input records=212
+17/01/31 13:39:40 INFO mapred.JobClient:     Map output records=212
+17/01/31 13:39:40 INFO mapred.JobClient:     Input split bytes=608
+17/01/31 13:39:40 INFO mapred.JobClient:     Spilled Records=0
+17/01/31 13:39:40 INFO mapred.JobClient:     CPU time spent (ms)=26160
+17/01/31 13:39:40 INFO mapred.JobClient:     Physical memory (bytes) snapshot=560975872
+17/01/31 13:39:40 INFO mapred.JobClient:     Virtual memory (bytes) snapshot=4344078336
+17/01/31 13:39:40 INFO mapred.JobClient:     Total committed heap usage (bytes)=95158272
+17/01/31 13:39:40 INFO mapreduce.ImportJobBase: Transferred 3.9336 KB in 223.776 seconds (18.0001 bytes/sec)
+17/01/31 13:39:40 INFO mapreduce.ImportJobBase: Retrieved 212 records.
+
+
+## export table from HDFS to Mysql
+sqoop export --connect "jdbc:mysql://localhost.localdomain:3306/training_new"  
+--username training --password training  --table countries 
+--export-dir /user/hive/warehouse/sqoop_countries  
+--input-fields-terminated-by ','  --input-lines-terminated-by '\n'  
+--num-mappers 6 --batch
