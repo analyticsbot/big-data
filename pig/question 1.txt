@@ -1,0 +1,7 @@
+-- problem 1 -- List All employee records
+
+-- load the file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- display final output on console
+dump employee;

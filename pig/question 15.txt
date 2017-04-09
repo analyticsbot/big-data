@@ -1,0 +1,7 @@
+-- problem 15 - describe relation
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- describe the relation employee
+describe employee;

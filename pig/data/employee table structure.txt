@@ -1,0 +1,8 @@
+empno decimal(4,0) not null,
+ename varchar(10) null,
+job varchar(9) null,
+mgr decimal(4,0) null,
+hiredate date null,
+sal decimal(7,2) null,
+comm decimal(7,2) null,
+deptno decimal(2,0) null

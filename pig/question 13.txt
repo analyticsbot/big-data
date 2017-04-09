@@ -1,0 +1,16 @@
+-- problem 13 - List Employee names starting with ‘S’ and having five characters
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- get all records
+all_recs = foreach employee generate empno,ename, job,mgr,hiredate, sal, comm,deptno;
+
+-- filter records according to the criteria
+rec_fltr = filter all_recs by   SIZE(ename) == 5) and (SUBSTRING(ename,0,1) == 'S');
+
+-- order records
+rec_ordr = order rec_fltr by sal;
+
+-- display records to screen
+dump rec_fltr;

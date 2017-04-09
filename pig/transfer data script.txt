@@ -1,0 +1,11 @@
+-- change the directory
+[root@sandbox ~]# cd ravi/mysql_ex/data/pig_data/
+
+-- create a folder for files to be transferrred
+[root@sandbox pig_data]# hadoop fs -mkdir /user/pig
+
+-- transfer the employee.txt to hdfs
+[root@sandbox pig_data]# hadoop fs -put employee.txt /user/pig/
+
+-- transfer the department.txt to hdfs
+[root@sandbox pig_data]# hadoop fs -put department.txt /user/pig/

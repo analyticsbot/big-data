@@ -1,0 +1,13 @@
+--problem 10 - List details of Employees whose Commission is more than their salary
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+--get all records and make new columns
+all_recs = foreach employee generate empno,ename,job,mgr,hiredate, sal, comm,deptno;
+
+-- filter records where commission is more than the salary
+fltr_recs = filter all_recs by (comm>sal);
+
+-- display records to screen
+dump fltr_recs;

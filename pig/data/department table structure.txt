@@ -1,0 +1,3 @@
+deptno decimal(2,0) null,
+dname varchar(14) null,
+Ioc varchar(13) null

@@ -1,0 +1,32 @@
+-- problem 18 -- join two relations
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- load departments file
+department = LOAD '/user/pig/department.txt' USING PigStorage(',') as (deptno:int, dname:chararray, Ioc:chararray);
+
+-- join employee and department by deptno
+-- this will by default be an inner join
+join_table = JOIN employee BY deptno, department BY deptno;
+
+-- display results on screen
+-- dump join_table;
+
+-- left outer join employee and department by deptno
+join_table = JOIN employee BY deptno LEFT OUTER, department BY deptno;
+
+-- display results on screen
+-- dump join_table;
+
+-- right outer join employee and department by deptno
+join_table = JOIN employee BY deptno RIGHT OUTER, department BY deptno;
+
+-- display results on screen
+-- dump join_table;
+
+-- full outer join employee and department by deptno
+join_table = JOIN employee BY deptno FULL OUTER, department BY deptno;
+
+-- display results on screen
+-- dump join_table;

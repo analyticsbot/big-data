@@ -1,0 +1,14 @@
+-- problem 4 -- List employee records in desc order of their salaries
+
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- get all records 
+all_employees = foreach employee generate empno,ename,job,mgr,hiredate,sal,comm,deptno;
+
+-- order records by emp salary
+ordered_employee_salary = order all_employees by sal desc;
+
+-- display the employee records in descending order of their emp salary
+dump ordered_employee_salary 

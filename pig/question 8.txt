@@ -1,0 +1,13 @@
+--problem 8 -- List Empno, Ename, Sal, Daily Sal of all Employees in ascending order of AnnSal
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- get all records and make new columns or dailysal and annsal
+all_recs = foreach employee generate empno,ename,job,mgr,hiredate,sal ,(int)(sal/30) as dailysal, (int)(sal*12) as annsal, comm,deptno;
+
+-- order by annsal. default is ascending
+ordr_recs = order all_recs by annsal;
+
+-- display to screen
+dump ordr_recs;

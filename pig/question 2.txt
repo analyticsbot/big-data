@@ -1,0 +1,13 @@
+-- problem 2 -- Only unique job titles from EMP data
+
+-- read the employee data
+data = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- use for foreach
+all_employees = foreach data generate empno;
+
+-- get only unique data from extracted column
+uniq_employees = distinct all_employees;
+
+-- display data on console
+dump uniq_employees;

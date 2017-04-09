@@ -1,0 +1,12 @@
+-- problem 16 - explain operator is used to display the logical, physical, and MapReduce execution plans of a relation.
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+all_recs = foreach employee generate empno,ename, job,mgr,hiredate, sal, comm,deptno;
+rec_fltr = filter all_recs by ( job != 'MANAGER' AND job != 'PRESIDENT') ;
+rec_ordr = order rec_fltr by sal;
+dump rec_ordr;
+
+-- explain how the data will be retrieved in terms on MapReduce operations
+explain rec_ordr;

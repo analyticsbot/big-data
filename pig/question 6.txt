@@ -1,0 +1,16 @@
+--problem 6 -- List all the unique job title in a descending order
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- get all jobs
+all_jobs = foreach employee generate job;
+
+-- get all distinct jobs
+uniq_jobs = distinct all_jobs;
+
+-- order jobs in descending order
+ordr_job = order uniq_jobs by job desc; 
+
+-- display the jobs to console
+dump ordr_job;

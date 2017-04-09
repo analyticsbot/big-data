@@ -1,0 +1,13 @@
+--problem 5 -- List employees in asc order of dept nbr. & desc of job title
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- get all records 
+all_employees = foreach employee generate empno,ename,job,mgr,hiredate,sal,comm,deptno;
+
+-- order records by department number ascending and then by job descending
+ordered_employee = order all_employees  by deptno asc, job desc;
+
+-- display the employee records in descending order of their emp salary
+dump ordered_employee;

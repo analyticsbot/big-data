@@ -1,0 +1,212 @@
+-- downloaded from https://launchpad.net/test-db
+cd mysql_ex/
+-- download the employee database
+wget https://launchpad.net/test-db/employees-db-1/1.0.6/+download/employees_db-full-1.0.6.tar.bz2
+-- unzip the zipped database
+tar -xjf employees_db-full-1.0.6.tar.bz2
+-- move to the directory
+cd employee_db/
+-- import the employee database to mysql
+mysql -u root -p -t < employees.sql
+
+-- check
+mysql -u root -p
+-- password is hadoop
+
+-- show databases
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| employees          |
+| hive               |
+| mysql              |
+| performance_schema |
+| ranger             |
++--------------------+
+6 rows in set (0.00 sec)
+
+-- use employees database
+mysql> use employees;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+
+-- show tables
+mysql> show tables;
++---------------------+
+| Tables_in_employees |
++---------------------+
+| departments         |
+| dept_emp            |
+| dept_manager        |
+| employees           |
+| salaries            |
+| titles              |
++---------------------+
+6 rows in set (0.00 sec)
+
+-- show count of rows from departments
+mysql> select count(*) from departments;
++----------+
+| count(*) |
++----------+
+|        9 |
++----------+
+1 row in set (0.00 sec)
+
+-- show count of rows from dept_emp
+mysql> select count(*) from dept_emp;                                           
++----------+
+| count(*) |
++----------+
+|   331603 |
++----------+
+1 row in set (0.08 sec)
+
+-- show first 5 rows from titles
+mysql> select * from titles limit 5;
++--------+-----------------+------------+------------+
+| emp_no | title           | from_date  | to_date    |
++--------+-----------------+------------+------------+
+|  10001 | Senior Engineer | 1986-06-26 | 9999-01-01 |
+|  10002 | Staff           | 1996-08-03 | 9999-01-01 |
+|  10003 | Senior Engineer | 1995-12-03 | 9999-01-01 |
+|  10004 | Engineer        | 1986-12-01 | 1995-12-01 |
+|  10004 | Senior Engineer | 1995-12-01 | 9999-01-01 |
++--------+-----------------+------------+------------+
+5 rows in set (0.00 sec)
+
+-- show first 5 rows from salaries
+mysql> select * from salaries limit 5;
++--------+--------+------------+------------+
+| emp_no | salary | from_date  | to_date    |
++--------+--------+------------+------------+
+|  10001 |  60117 | 1986-06-26 | 1987-06-26 |
+|  10001 |  62102 | 1987-06-26 | 1988-06-25 |
+|  10001 |  66074 | 1988-06-25 | 1989-06-25 |
+|  10001 |  66596 | 1989-06-25 | 1990-06-25 |
+|  10001 |  66961 | 1990-06-25 | 1991-06-25 |
++--------+--------+------------+------------+
+5 rows in set (0.00 sec)
+
+-- show first 5 rows from employees
++--------+------------+------------+-----------+--------+------------+
+| emp_no | birth_date | first_name | last_name | gender | hire_date  |
++--------+------------+------------+-----------+--------+------------+
+|  10001 | 1953-09-02 | Georgi     | Facello   | M      | 1986-06-26 |
+|  10002 | 1964-06-02 | Bezalel    | Simmel    | F      | 1985-11-21 |
+|  10003 | 1959-12-03 | Parto      | Bamford   | M      | 1986-08-28 |
+|  10004 | 1954-05-01 | Chirstian  | Koblick   | M      | 1986-12-01 |
+|  10005 | 1955-01-21 | Kyoichi    | Maliniak  | M      | 1989-09-12 |
++--------+------------+------------+-----------+--------+------------+
+5 rows in set (0.00 sec)
+
+-- show first 5 rows from dept_manager
+mysql> select * from dept_manager limit 5;
++---------+--------+------------+------------+
+| dept_no | emp_no | from_date  | to_date    |
++---------+--------+------------+------------+
+| d001    | 110022 | 1985-01-01 | 1991-10-01 |
+| d001    | 110039 | 1991-10-01 | 9999-01-01 |
+| d002    | 110085 | 1985-01-01 | 1989-12-17 |
+| d002    | 110114 | 1989-12-17 | 9999-01-01 |
+| d003    | 110183 | 1985-01-01 | 1992-03-21 |
++---------+--------+------------+------------+
+5 rows in set (0.00 sec)
+
+-- describe tables
+mysql> describe departments;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| dept_no   | char(4)     | NO   | PRI | NULL    |       |
+| dept_name | varchar(40) | NO   | UNI | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+mysql> describe dept_emp;
++-----------+---------+------+-----+---------+-------+
+| Field     | Type    | Null | Key | Default | Extra |
++-----------+---------+------+-----+---------+-------+
+| emp_no    | int(11) | NO   | PRI | NULL    |       |
+| dept_no   | char(4) | NO   | PRI | NULL    |       |
+| from_date | date    | NO   |     | NULL    |       |
+| to_date   | date    | NO   |     | NULL    |       |
++-----------+---------+------+-----+---------+-------+
+4 rows in set (0.01 sec)
+
+mysql> describe dept_manager;
++-----------+---------+------+-----+---------+-------+
+| Field     | Type    | Null | Key | Default | Extra |
++-----------+---------+------+-----+---------+-------+
+| dept_no   | char(4) | NO   | PRI | NULL    |       |
+| emp_no    | int(11) | NO   | PRI | NULL    |       |
+| from_date | date    | NO   |     | NULL    |       |
+| to_date   | date    | NO   |     | NULL    |       |
++-----------+---------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+mysql> describe employees;
++------------+---------------+------+-----+---------+-------+
+| Field      | Type          | Null | Key | Default | Extra |
++------------+---------------+------+-----+---------+-------+
+| emp_no     | int(11)       | NO   | PRI | NULL    |       |
+| birth_date | date          | NO   |     | NULL    |       |
+| first_name | varchar(14)   | NO   |     | NULL    |       |
+| last_name  | varchar(16)   | NO   |     | NULL    |       |
+| gender     | enum('M','F') | NO   |     | NULL    |       |
+| hire_date  | date          | NO   |     | NULL    |       |
++------------+---------------+------+-----+---------+-------+
+6 rows in set (0.00 sec)
+
+mysql> describe salaries;
++-----------+---------+------+-----+---------+-------+
+| Field     | Type    | Null | Key | Default | Extra |
++-----------+---------+------+-----+---------+-------+
+| emp_no    | int(11) | NO   | PRI | NULL    |       |
+| salary    | int(11) | NO   |     | NULL    |       |
+| from_date | date    | NO   | PRI | NULL    |       |
+| to_date   | date    | NO   |     | NULL    |       |
++-----------+---------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+mysql> describe titles;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| emp_no    | int(11)     | NO   | PRI | NULL    |       |
+| title     | varchar(50) | NO   | PRI | NULL    |       |
+| from_date | date        | NO   | PRI | NULL    |       |
+| to_date   | date        | YES  |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+-- join two tables (employee and salaries) and display first 5 rows
+mysql> mysql> select * from employees e join salaries s on e.emp_no=s.emp_no limit 5;
++--------+------------+------------+-----------+--------+------------+--------+--------+------------+------------+
+| emp_no | birth_date | first_name | last_name | gender | hire_date  | emp_no | salary | from_date  | to_date    |
++--------+------------+------------+-----------+--------+------------+--------+--------+------------+------------+
+|  10001 | 1953-09-02 | Georgi     | Facello   | M      | 1986-06-26 |  10001 |  60117 | 1986-06-26 | 1987-06-26 |
+|  10001 | 1953-09-02 | Georgi     | Facello   | M      | 1986-06-26 |  10001 |  62102 | 1987-06-26 | 1988-06-25 |
+|  10001 | 1953-09-02 | Georgi     | Facello   | M      | 1986-06-26 |  10001 |  66074 | 1988-06-25 | 1989-06-25 |
+|  10001 | 1953-09-02 | Georgi     | Facello   | M      | 1986-06-26 |  10001 |  66596 | 1989-06-25 | 1990-06-25 |
+|  10001 | 1953-09-02 | Georgi     | Facello   | M      | 1986-06-26 |  10001 |  66961 | 1990-06-25 | 1991-06-25 |
++--------+------------+------------+-----------+--------+------------+--------+--------+------------+------------+
+5 rows in set (0.01 sec)
+
+-- join tables and select columns to display
+mysql> select e.emp_no, e.birth_date, e.first_name, s.salary, e.hire_date from employees e join salaries s on e.emp_no=s.emp_no limit 5;
++--------+------------+------------+--------+------------+
+| emp_no | birth_date | first_name | salary | hire_date  |
++--------+------------+------------+--------+------------+
+|  10001 | 1953-09-02 | Georgi     |  60117 | 1986-06-26 |
+|  10001 | 1953-09-02 | Georgi     |  62102 | 1986-06-26 |
+|  10001 | 1953-09-02 | Georgi     |  66074 | 1986-06-26 |
+|  10001 | 1953-09-02 | Georgi     |  66596 | 1986-06-26 |
+|  10001 | 1953-09-02 | Georgi     |  66961 | 1986-06-26 |
++--------+------------+------------+--------+------------+
+5 rows in set (0.00 sec)
+

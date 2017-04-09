@@ -1,0 +1,19 @@
+-- problem 14 - List all employees except ‘President’ & ‘Manager’ in asc order of salaries. then save to a file on hdfs
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- get all records
+all_recs = foreach data generate empno,ename, job,mgr,hiredate, sal, comm,deptno;
+
+-- get all records where job is not manager or president
+rec_fltr = filter all_recs by ( job != 'MANAGER' AND job != 'PRESIDENT') ;
+
+-- order by salary
+rec_ordr = order rec_fltr by sal;
+
+-- display results on screen
+dump rec_ordr;
+
+-- store to file on hdfs
+STORE rec_ordr INTO '/user/pig/question14.txt' 

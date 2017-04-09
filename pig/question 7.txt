@@ -1,0 +1,13 @@
+--problem  7 -- List all employees who are ‘Managers’
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- get all values
+all_recs = foreach data generate empno,ename,job,mgr,hiredate,sal,comm,deptno;
+
+-- filter managers since the job is MANAGER for them
+fltr_mgrs = filter all_recs by job=='MANAGER' ;
+
+-- display managers to screen
+dump fltr_mgrs;

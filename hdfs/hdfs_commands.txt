@@ -1,0 +1,154 @@
+[root@sandbox ~]# hadoop fs
+Usage: hadoop fs [generic options]
+        [-appendToFile <localsrc> ... <dst>]
+        [-cat [-ignoreCrc] <src> ...]
+        [-checksum <src> ...]
+        [-chgrp [-R] GROUP PATH...]
+        [-chmod [-R] <MODE[,MODE]... | OCTALMODE> PATH...]
+        [-chown [-R] [OWNER][:[GROUP]] PATH...]
+        [-copyFromLocal [-f] [-p] [-l] <localsrc> ... <dst>]
+        [-copyToLocal [-p] [-ignoreCrc] [-crc] <src> ... <localdst>]
+        [-count [-q] [-h] [-v] [-t [<storage type>]] <path> ...]
+        [-cp [-f] [-p | -p[topax]] <src> ... <dst>]
+        [-createSnapshot <snapshotDir> [<snapshotName>]]
+        [-deleteSnapshot <snapshotDir> <snapshotName>]
+        [-df [-h] [<path> ...]]
+        [-du [-s] [-h] <path> ...]
+        [-expunge]
+        [-find <path> ... <expression> ...]
+        [-get [-p] [-ignoreCrc] [-crc] <src> ... <localdst>]
+        [-getfacl [-R] <path>]
+        [-getfattr [-R] {-n name | -d} [-e en] <path>]
+        [-getmerge [-nl] <src> <localdst>]
+        [-help [cmd ...]]
+        [-ls [-C] [-d] [-h] [-q] [-R] [-t] [-S] [-r] [-u] [<path> ...]]
+        [-mkdir [-p] <path> ...]
+        [-moveFromLocal <localsrc> ... <dst>]
+        [-moveToLocal <src> <localdst>]
+        [-mv <src> ... <dst>]
+        [-put [-f] [-p] [-l] <localsrc> ... <dst>]
+        [-renameSnapshot <snapshotDir> <oldName> <newName>]
+        [-rm [-f] [-r|-R] [-skipTrash] [-safely] <src> ...]
+        [-rmdir [--ignore-fail-on-non-empty] <dir> ...]
+        [-setfacl [-R] [{-b|-k} {-m|-x <acl_spec>} <path>]|[--set <acl_spec> <path>]]
+        [-setfattr {-n name [-v value] | -x name} <path>]
+        [-setrep [-R] [-w] <rep> <path> ...]
+        [-stat [format] <path> ...]
+        [-tail [-f] <file>]
+        [-test -[defsz] <path>]
+        [-text [-ignoreCrc] <src> ...]
+        [-touchz <path> ...]
+        [-truncate [-w] <length> <path> ...]
+        [-usage [cmd ...]]
+
+-- copyFromLocal is similar to put command, except that the source is restricted to a local file reference
+-- copyToLocal is similar to get command, except that the destination is restricted to a local file reference
+-- appendToFile - Append single src, or multiple srcs from local file system to the destination file system. Also reads input from stdin and appends to destination file system
+-- cat displays the content of the file to the screen
+-- chmod like in Ubuntu changes file permission
+-- cp copies files from source to destination. This command allows multiple sources as well in which case the destination must be a directory
+-- get copies files to the local file system. Files that fail the CRC check may be copied with the -ignorecrc option. Files and CRCs may be copied using the -crc option
+-- ls shows the directories and files in a hdfs location
+	Options:
+	-C: Display the paths of files and directories only.
+	-d: Directories are listed as plain files.
+	-h: Format file sizes in a human-readable fashion (eg 64.0m instead of 67108864).
+	-q: Print ? instead of non-printable characters.
+	-R: Recursively list subdirectories encountered.
+	-t: Sort output by modification time (most recent first).
+	-S: Sort output by file size.
+	-r: Reverse the sort order.
+	-u: Use access time rather than modification time for display and sorting
+-- mkdir makes a directory in a hdfs location
+-- moveFromLocal is similar to put command, except that the source localsrc is deleted after it’s copied
+-- put copies single src, or multiple srcs from local file system to the destination file system
+-- rm deleted files. Options below
+	The -f option will not display a diagnostic message or modify the exit status to reflect an error if the file does not exist.
+	The -R option deletes the directory and any content under it recursively.
+	The -r option is equivalent to -R.
+	The -skipTrash option will bypass trash, if enabled, and delete the specified file(s) immediately. This can be useful when it is necessary to delete files from an over-quota directory.
+	The -safely option will require safety confirmation before deleting directory with total number of files greater than hadoop.shell.delete.limit.num.files (in core-site.xml, default: 100). It can be used with -skipTrash to prevent accidental deletion of large directories. Delay is expected when walking over large directory recursively to count the number of files to be deleted before the confirmation.
+-- rmdir deleted a directory
+-- tail displays last few lines of a file to screen
+
+
+## transfer files form local to hdfs
+
+-- check the folders
+[root@sandbox ~]# cd ravi/mysql_ex/data/
+[root@sandbox data]# ls
+airlines  cloudera  dataset_diabetes  employees  UIDAI
+
+-- list directories and files in the hdfs root directory
+[root@sandbox data]# hadoop fs -ls /
+Found 12 items
+drwxrwxrwx   - yarn   hadoop          0 2017-03-13 04:49 /app-logs
+drwxr-xr-x   - hdfs   hdfs            0 2016-10-25 07:54 /apps
+drwxr-xr-x   - yarn   hadoop          0 2016-10-25 07:48 /ats
+drwxr-xr-x   - hdfs   hdfs            0 2016-10-25 08:01 /demo
+drwxr-xr-x   - hdfs   hdfs            0 2016-10-25 07:48 /hdp
+drwxr-xr-x   - mapred hdfs            0 2016-10-25 07:48 /mapred
+drwxrwxrwx   - mapred hadoop          0 2016-10-25 07:48 /mr-history
+drwxr-xr-x   - hdfs   hdfs            0 2016-10-25 07:47 /ranger
+drwxrwxrwx   - spark  hadoop          0 2017-04-09 05:01 /spark-history
+drwxrwxrwx   - spark  hadoop          0 2017-03-14 02:09 /spark2-history
+drwxrwxrwx   - hdfs   hdfs            0 2017-03-13 04:04 /tmp
+drwxr-xr-x   - hdfs   hdfs            0 2017-03-13 04:49 /user
+
+-- list directories and files in the hdfs /user/ directory
+[root@sandbox data]# hadoop fs -ls /user
+Found 14 items
+drwxr-xr-x   - admin      hdfs          0 2016-12-15 09:48 /user/admin
+drwxrwx---   - ambari-qa  hdfs          0 2017-03-13 04:04 /user/ambari-qa
+drwxr-xr-x   - amy_ds     hdfs          0 2016-10-25 08:02 /user/amy_ds
+drwxr-xr-x   - hbase      hdfs          0 2016-10-25 07:48 /user/hbase
+drwxr-xr-x   - hcat       hdfs          0 2016-10-25 07:51 /user/hcat
+drwxr-xr-x   - hive       hdfs          0 2016-10-25 08:10 /user/hive
+drwxr-xr-x   - holger_gov hdfs          0 2016-10-25 08:03 /user/holger_gov
+drwxrwxr-x   - livy       hdfs          0 2016-10-25 07:49 /user/livy
+drwxr-xr-x   - maria_dev  hdfs          0 2016-10-25 07:58 /user/maria_dev
+drwxrwxr-x   - oozie      hdfs          0 2016-10-25 07:52 /user/oozie
+drwxr-xr-x   - raj_ops    hdfs          0 2016-10-25 08:04 /user/raj_ops
+drwxr-xr-x   - root       hdfs          0 2017-03-26 04:15 /user/root
+drwxrwxr-x   - spark      hdfs          0 2016-10-25 07:48 /user/spark
+drwxr-xr-x   - zeppelin   hdfs          0 2016-10-25 07:50 /user/zeppelin
+
+-- create a directory cloudera
+[root@sandbox data]# hadoop fs -mkdir /user/cloudera
+[root@sandbox data]#
+
+-- transfer the contents of cloudera local directory to hdfs /user/cloudera directory recursively
+[root@sandbox data]# hadoop fs -put /root/ravi/mysql_ex/data/cloudera/* /user/cloudera/
+
+-- check the content of /user/cloudera directory on hdfs
+[root@sandbox data]# hadoop fs -ls /user/cloudera
+Found 6 items
+drwxr-xr-x   - root hdfs          0 2017-04-09 05:05 /user/cloudera/categories
+drwxr-xr-x   - root hdfs          0 2017-04-09 05:05 /user/cloudera/customers
+drwxr-xr-x   - root hdfs          0 2017-04-09 05:05 /user/cloudera/departments
+drwxr-xr-x   - root hdfs          0 2017-04-09 05:05 /user/cloudera/order_items
+drwxr-xr-x   - root hdfs          0 2017-04-09 05:05 /user/cloudera/orders
+drwxr-xr-x   - root hdfs          0 2017-04-09 05:05 /user/cloudera/products
+
+-- check the content of /user/cloudera/orders directory on hdfs
+[root@sandbox data]# hadoop fs -ls /user/cloudera/orders
+Found 1 items
+-rw-r--r--   1 root hdfs    2999944 2017-04-09 05:05 /user/cloudera/orders/part-00000
+
+-- display first 5 rows of orders file on hdfs to screen
+[root@sandbox data]# hadoop fs -cat /user/cloudera/orders/* | head -n 5
+1,2013-07-25 00:00:00.0,11599,CLOSED
+2,2013-07-25 00:00:00.0,256,PENDING_PAYMENT
+3,2013-07-25 00:00:00.0,12111,COMPLETE
+4,2013-07-25 00:00:00.0,8827,CLOSED
+5,2013-07-25 00:00:00.0,11318,COMPLETE
+cat: Unable to write to output stream
+
+-- display last 5 rows of orders file on hdfs to screen
+[root@sandbox data]# hadoop fs -cat /user/cloudera/orders/* | tail -n 5
+68879,2014-07-09 00:00:00.0,778,COMPLETE
+68880,2014-07-13 00:00:00.0,1117,COMPLETE
+68881,2014-07-19 00:00:00.0,2518,PENDING_PAYMENT
+68882,2014-07-22 00:00:00.0,10000,ON_HOLD
+68883,2014-07-23 00:00:00.0,5533,COMPLETE
+

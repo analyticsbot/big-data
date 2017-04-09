@@ -1,0 +1,13 @@
+-- problem 11 -  List Employees in ascending order of Designations
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+-- get all records
+all_recs = foreach employee generate empno,ename,job,mgr,hiredate, sal, comm,deptno;
+
+-- order by date
+recs_ordr = order all_recs by job asc;
+
+-- display the results
+dump recs_ordr;

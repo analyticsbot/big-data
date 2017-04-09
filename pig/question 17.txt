@@ -1,0 +1,19 @@
+-- problem 17 - group by job title
+
+-- load employee file
+employee = LOAD '/user/pig/employee.txt' USING PigStorage(',') as (empno:int, ename:chararray, job:chararray, mgr:int, hiredate:chararray, sal:float, comm:float, deptno:int);
+
+
+--get all records and make new columns
+all_recs = foreach employee generate empno,ename,job,mgr,hiredate, sal, comm,deptno;
+
+-- group data by job title
+-- can be grouped by multiple columns as well 
+-- group relation by (a, b, c, d);
+group_data = GROUP all_recs BY job;
+
+-- display on screen;
+dump group_data;
+
+-- describe group_data;
+describe group_data;
