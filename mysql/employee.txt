@@ -93,6 +93,7 @@ mysql> select * from salaries limit 5;
 5 rows in set (0.00 sec)
 
 -- show first 5 rows from employees
+mysql> select * from employees limit 5;
 +--------+------------+------------+-----------+--------+------------+
 | emp_no | birth_date | first_name | last_name | gender | hire_date  |
 +--------+------------+------------+-----------+--------+------------+
@@ -184,8 +185,8 @@ mysql> describe titles;
 +-----------+-------------+------+-----+---------+-------+
 4 rows in set (0.00 sec)
 
--- join two tables (employee and salaries) and display first 5 rows
-mysql> mysql> select * from employees e join salaries s on e.emp_no=s.emp_no limit 5;
+-- join two tables (employees and salaries) and display first 5 rows
+mysql> select * from employees e join salaries s on e.emp_no=s.emp_no limit 5;
 +--------+------------+------------+-----------+--------+------------+--------+--------+------------+------------+
 | emp_no | birth_date | first_name | last_name | gender | hire_date  | emp_no | salary | from_date  | to_date    |
 +--------+------------+------------+-----------+--------+------------+--------+--------+------------+------------+

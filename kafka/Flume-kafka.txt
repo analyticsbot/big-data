@@ -1,0 +1,28 @@
+# kandf.conf: Flume and Kafka integration
+# Read streaming data from logs and push it to Kafka as sink
+
+# Name the components on this agent
+kandf.sources = logsource
+kandf.sinks = ksink
+kandf.channels = mchannel
+
+# Describe/configure the source
+kandf.sources.logsource.type = exec
+kandf.sources.logsource.command = tail -F /opt/gen_logs/logs/access.log
+
+# Describe the sink
+# Flume version is 1.5.2
+# Make sure all kafka related jar files are available under 
+# /usr/hdp/2.5.0.0-1245/flume/lib
+kandf.sinks.ksink.type = org.apache.flume.sink.kafka.KafkaSink
+kandf.sinks.ksink.brokerList = nn02.itversity.com:6667
+kandf.sinks.ksink.topic = kafkadg
+
+# Use a channel which buffers events in memory
+kandf.channels.mchannel.type = memory
+kandf.channels.mchannel.capacity = 1000
+kandf.channels.mchannel.transactionCapacity = 100
+
+# Bind the source and sink to the channel
+kandf.sources.logsource.channels = mchannel
+kandf.sinks.ksink.channel = mchannel

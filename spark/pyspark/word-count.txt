@@ -1,0 +1,6 @@
+for i in sc.textFile("/public/randomtextwriter/part-m-00000"). \
+flatMap(lambda rec: rec.split(" ")). \
+map(lambda rec: (rec, 1)). \
+reduceByKey(lambda total, value: total + value). \
+take(100):
+  print(i)

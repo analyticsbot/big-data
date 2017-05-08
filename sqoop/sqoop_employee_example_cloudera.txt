@@ -1,0 +1,185 @@
+-- show all databases on mysql
+sqoop list-databases --connect "jdbc:mysql://quickstart.cloudera:3306" --username root  --password cloudera
+
+## output
+Warning: /usr/lib/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+17/04/20 16:59:21 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.8.0
+17/04/20 16:59:21 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+17/04/20 16:59:21 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+information_schema
+cm
+employees
+firehose
+hue
+metastore
+mysql
+nav
+navms
+oozie
+retail_db
+rman
+sentry
+
+
+-- show tables from employee database on mysql
+sqoop list-tables --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username root --password cloudera
+
+## output
+
+Warning: /usr/lib/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+17/04/20 17:01:13 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.8.0
+17/04/20 17:01:13 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+17/04/20 17:01:13 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+departments
+dept_emp
+dept_manager
+employees
+salaries
+titles
+
+
+-- show first 5 rows from employees table in employees database on mysql
+sqoop eval --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username root --password cloudera --query "select * from employees  limit 5;"
+
+## output 
+
+Warning: /usr/lib/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+17/04/20 17:02:20 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.8.0
+17/04/20 17:02:20 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+17/04/20 17:02:20 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+---------------------------------------------------------------------------------
+| emp_no      | birth_date | first_name     | last_name        | gender | hire_date  |
+---------------------------------------------------------------------------------
+| 10001       | 1953-09-02 | Georgi         | Facello          | M | 1986-06-26 |
+| 10002       | 1964-06-02 | Bezalel        | Simmel           | F | 1985-11-21 |
+| 10003       | 1959-12-03 | Parto          | Bamford          | M | 1986-08-28 |
+| 10004       | 1954-05-01 | Chirstian      | Koblick          | M | 1986-12-01 |
+| 10005       | 1955-01-21 | Kyoichi        | Maliniak         | M | 1989-09-12 |
+---------------------------------------------------------------------------------
+
+
+-- import all tables from mysql employees database to hdfs
+-- step 1. create the directory
+hadoop fs -mkdir /user/employees
+
+-- transfer the database
+-- note the "-Dorg.apache.sqoop.splitter.allow_text_splitter=true" and --driver "com.mysql.jdbc.Driver" arguments have been added since I was getting
+-- and error without them. After doing Google and looking at answers at stackoverflow, I found these have to be added
+-- I was getting these errors because some of the primary keys of tables in employees are text and sqoop uses split by for mappers
+-- which wont work when its text
+-- this command will execute a series of map reduce jobs for each table in the employees database
+sqoop import-all-tables "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver" --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --warehouse-dir=/employees -m 2
+
+sqoop import-all-tables --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --warehouse-dir=/employees -m 2
+
+-- transfer all tables in employees database on mysql using a compression codec. create a hive table. overwrite if it exists
+sqoop import-all-tables "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver" --num-mappers 1   --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --hive-import --hive-overwrite  --create-hive-table --compress
+
+-- check if the data is copied in hive
+hive> show databases;
+OK
+default
+Time taken: 0.645 seconds, Fetched: 1 row(s)
+hive> use default;
+OK
+Time taken: 0.024 seconds
+hive> show tables;
+OK
+departments
+dept_emp
+dept_manager
+employees
+salaries
+titles
+Time taken: 0.039 seconds, Fetched: 6 row(s)
+hive> select * from departments ;
+OK
+d009    Customer Service
+d005    Development
+d002    Finance
+d003    Human Resources
+d001    Marketing
+d004    Production
+d006    Quality Management
+d008    Research
+d007    Sales
+Time taken: 0.065 seconds, Fetched: 9 row(s)
+
+-- transfer departments table from employee database on mysql
+-- using text-file format here. other formats such as avro and sequence can be used (--as-avrofile --as-sequencefile)
+-- make sure the directory /user/departments does not exists
+hadoop fs -mkdir /departments
+
+sqoop import "-Dorg.apache.sqoop.splitter.allow_text_splitter=true" --driver "com.mysql.jdbc.Driver" --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --table departments --as-textfile --target-dir=/departments
+
+-- check if the files are copied
+hadoop fs -ls /departments
+Found 5 items
+-rw-r--r--   1 cloudera supergroup          0 2017-04-21 01:53 /departments/_SUCCESS
+-rw-r--r--   1 cloudera supergroup         28 2017-04-21 01:53 /departments/part-m-00000
+-rw-r--r--   1 cloudera supergroup         37 2017-04-21 01:53 /departments/part-m-00001
+-rw-r--r--   1 cloudera supergroup         41 2017-04-21 01:53 /departments/part-m-00002
+-rw-r--r--   1 cloudera supergroup         47 2017-04-21 01:53 /departments/part-m-00003
+
+-- view the contents
+hadoop fs -cat /departments/part-*
+d001,Marketing
+d002,Finance
+d003,Human Resources
+d004,Production
+d005,Development
+d006,Quality Management
+d007,Sales
+d008,Research
+d009,Customer Service
+
+
+-- Using Boundary Query and selecting particular columns
+-- boundary query is how sqoop uses to split the tables so that multiple threads could act upon it for the import
+-- columns parameter can help to import specific columns
+sqoop import "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver"  --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --table employees --target-dir=/employees_table -m 2   --boundary-query "select 10001,10002 from employees limit 1" --columns emp_no,first_name
+
+-- query parameter can be passed to import a subset or import a merged table without creating a temporary table in mysql.
+-- it is done on fly
+-- split by parameter splits on that column for the mappers to act upon
+sqoop import "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver"  --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --query="select e.emp_no, e.birth_date, e.first_name, s.salary, e.hire_date from employees e join salaries s on e.emp_no = s.emp_no where \$CONDITIONS" --target-dir=/employee_salaries --split-by e.emp_no --num-mappers 10
+
+-- While copying into an existing location, lets say new data needs to be copied, append operator should be used
+-- if no append is used, the task will fail saying the directory exists
+sqoop import "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver" --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --table employees --target-dir=/employees --append   --fields-terminated-by '|' --lines-terminated-by '\n'
+
+
+-- Using where clause to import data
+sqoop import "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver" --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --table salaries --target-dir=/salaries --split-by emp_no --where "salary > 62000"
+
+
+-- Incremental Imports - Sqoop provides an incremental import mode which can be used to retrieve only rows newer than some previously-imported set of rows.
+-- The following arguments control incremental imports:
+
+Argument	Description
+--check-column (col)	Specifies the column to be examined when determining which rows to import.
+--incremental (mode)	Specifies how Sqoop determines which rows are new. Legal values for mode include append and lastmodified.
+--last-value (value)	Specifies the maximum value of the check column from the previous import.
+
+sqoop import "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver" --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --table departments --target-dir /departments --append  --fields-terminated-by '|' --lines-terminated-by '\n' --check-column "dept_no" --incremental append --last-value 7 --outdir output_files
+
+
+--Create hive tables using sqoop. importing as hive tables. By default the hive home is /user/hive/warehouse
+sqoop import-all-tables  "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver" --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --hive-database employees --hive-import --hive-home /user/hive/warehouse
+
+
+--Create hive table using sqoop. importing as hive table. By default the hive home is /user/hive/warehouse
+sqoop import "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver" --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username=root --password=cloudera --table departments --fields-terminated-by '|' --lines-terminated-by '\n' --hive-home /user/hive/warehouse --hive-import --hive-table departments --create-hive-table --outdir output_files
+  
+  
+-- Overwrite existing data associated with hive table
+sqoop import "-Dorg.apache.sqoop.splitter.allow_text_splitter=true"  --driver "com.mysql.jdbc.Driver" --connect "jdbc:mysql://quickstart.cloudera:3306/employees"  --username=root --password=cloudera --table departments  --fields-terminated-by '|' --lines-terminated-by '\n' --hive-home /user/hive/warehouse/retail_ods.db --hive-import --hive-overwrite --hive-table departments --outdir output_files
+
+
+-- Exporting data from HDFS to mysql
+sqoop export --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username root --password cloudera --table salaries --export-dir /user/hive/warehouse/employees.db/salaries --input-fields-terminated-by '|' --input-lines-terminated-by '\n' --num-mappers 4  --batch --outdir output_files
+
+sqoop export --connect "jdbc:mysql://quickstart.cloudera:3306/employees" --username root --password cloudera --table departments --export-dir /user/cloudera/sqoop_import/departments_export --batch --outdir output_files -m 1 --update-key department_id --update-mode allowinsert
